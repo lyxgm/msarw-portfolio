@@ -1,5 +1,5 @@
 /* Deep-Ocean Instrument Panel: narrative portfolio page with tactile pill controls, diagonal shimmer, and editorial rhythm. */
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
 import { Copy, Play } from "lucide-react";
 import InteractiveBackdrop from "@/components/InteractiveBackdrop";
 
@@ -94,8 +94,40 @@ export default function Home() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [processProgress, setProcessProgress] = useState(0);
   const [clickBubbles, setClickBubbles] = useState<ClickBubble[]>([]);
+  const [loadingState, setLoadingState] = useState<"loading" | "fading" | "done">("loading");
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [activeNav, setActiveNav] = useState<string | null>(null);
   const capabilitySectionsRef = useRef<HTMLDivElement | null>(null);
   const processSectionRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reducedMotion ? 320 : 1600;
+    const fadeDuration = reducedMotion ? 0 : 900;
+    const startedAt = performance.now();
+    let frame = 0;
+    let fadeTimer = 0;
+    const updateProgress = (now: number) => {
+      const progress = Math.min(100, Math.round(((now - startedAt) / duration) * 100));
+      setLoadingProgress(progress);
+      if (progress < 100) frame = window.requestAnimationFrame(updateProgress);
+    };
+    frame = window.requestAnimationFrame(updateProgress);
+    const completeTimer = window.setTimeout(() => {
+      setLoadingProgress(100);
+      setLoadingState("fading");
+      fadeTimer = window.setTimeout(() => setLoadingState("done"), fadeDuration);
+    }, duration);
+    return () => { window.cancelAnimationFrame(frame); window.clearTimeout(completeTimer); window.clearTimeout(fadeTimer); };
+  }, []);
+  useEffect(() => {
+    const sections = ["work", "services", "contact"].map((id) => document.getElementById(id)).filter((section): section is HTMLElement => Boolean(section));
+    if (!sections.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) setActiveNav(entry.target.id); });
+    }, { rootMargin: "-18% 0px -62% 0px", threshold: 0 });
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     const element = capabilitySectionsRef.current;
     if (!element) return;
@@ -159,8 +191,15 @@ export default function Home() {
   };
   const scrollToContact = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
+    setActiveNav("contact");
     document.getElementById("contact")?.scrollIntoView({ behavior: "smooth", block: "center" });
     window.history.replaceState(null, "", "#contact");
+  };
+  const scrollToTop = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+    window.history.replaceState(null, "", "#top");
   };
   const handleSiteClick = (event: MouseEvent<HTMLDivElement>) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -170,12 +209,18 @@ export default function Home() {
     window.setTimeout(() => setClickBubbles((current) => current.filter((item) => item.id !== id)), 520);
   };
   return (
-    <div className="site-shell" onClick={handleSiteClick}>
+    <div className={`site-shell ${loadingState === "done" ? "is-ready" : "is-loading"}`} onClick={handleSiteClick}>
+      <div className={`loading-screen ${loadingState === "loading" ? "is-visible" : loadingState === "fading" ? "is-fading" : "is-hidden"}`} style={{ "--loading-blur": `${Math.max(0, 12 - loadingProgress * 0.12)}px` } as CSSProperties} aria-hidden={loadingState === "done"}>
+        <img className="loading-logo" src="/manus-storage/msarw-lettermark-isolated_14da4c21.png" alt="MSARW" />
+        <p className="loading-progress" aria-live="polite">{loadingProgress}%</p>
+        <p className="loading-label">LOADING</p>
+        <span className="loading-rule" />
+      </div>
       <div className="click-bubble-layer" aria-hidden="true">{clickBubbles.map((bubble) => <span key={bubble.id} className="click-bubble" style={{ left: bubble.x, top: bubble.y }} />)}</div>
       <InteractiveBackdrop />
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="MSARW home"><img src="/manus-storage/msarw-monogram_d9936f1a.png" alt="" /><span>MSARW<span className="brand-slash">/</span></span></a>
-        <nav><a href="#work">Work</a><a href="#services">Services</a><a href="#contact" onClick={scrollToContact}>Contact</a></nav>
+        <a className="brand" href="#top" aria-label="MSARW home"><img className="brand-logo" src="/manus-storage/msarw-lettermark-isolated_14da4c21.png" alt="MSARW" /></a>
+        <nav><a className={activeNav === "work" ? "is-active" : undefined} aria-current={activeNav === "work" ? "page" : undefined} href="#work" onClick={() => setActiveNav("work")}>Work</a><a className={activeNav === "services" ? "is-active" : undefined} aria-current={activeNav === "services" ? "page" : undefined} href="#services" onClick={() => setActiveNav("services")}>Services</a><a className={activeNav === "contact" ? "is-active" : undefined} aria-current={activeNav === "contact" ? "page" : undefined} href="#contact" onClick={scrollToContact}>Contact</a></nav>
         <a className="mini-pill" href="#contact" onClick={scrollToContact}>Start a Project</a>
       </header>
 
@@ -231,7 +276,7 @@ export default function Home() {
         {activeVideo && <div className="video-modal" role="dialog" aria-modal="true" aria-label={`${activeVideo.title} full video`} onClick={() => setActiveVideo(null)}><div className="video-modal-inner" onClick={(event) => event.stopPropagation()}><button type="button" className="video-close" onClick={() => setActiveVideo(null)} aria-label="Close video">×</button><p className="section-label"><span className="section-dot" />NOW PLAYING / {activeVideo.title}</p><video src={activeVideo.src} controls autoPlay playsInline className="full-video" /></div></div>}
         <section className="faq section-pad section-reveal"><SectionLabel>09 / Small print</SectionLabel><div className="faq-list">{faqs.map(([q, a], i) => { const isOpen = openFaq === i; return <div className="faq-item" key={q}><button aria-expanded={isOpen} aria-controls={`faq-answer-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)}><span>{q}</span><span className="faq-symbol" aria-hidden="true">{isOpen ? "^" : "˅"}</span></button><div id={`faq-answer-${i}`} className={`faq-answer ${isOpen ? "is-open" : ""}`}><p className="faq-answer-text">{a}</p></div></div>; })}</div></section>
       </main>
-      <footer className="footer"><span className="footer-identity"><img src="/manus-storage/msarw-monogram_d9936f1a.png" alt="" /> © 2026 MSARW — ALL FRAMES RESERVED</span><span className="footer-attribution">Pointer by <a href="https://www.flaticon.com/authors/seydesigner" target="_blank" rel="noreferrer">SeyfDesigner</a> · cursor by <a href="https://www.flaticon.com/authors/magnific" target="_blank" rel="noreferrer">Magnific</a> from <a href="https://www.flaticon.com/" target="_blank" rel="noreferrer">Flaticon</a></span><a href="#top">Back to top <MSARWArrow /></a></footer>
+      <footer className="footer"><span className="footer-identity">© 2026 MSARW — ALL FRAMES RESERVED</span><a href="#top" onClick={scrollToTop}>Back to top <MSARWArrow /></a></footer>
     </div>
   );
 }
