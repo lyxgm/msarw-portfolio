@@ -1,0 +1,8 @@
+[
+  { "question": "What's the typical turnaround time?", "answer": "Short-form edits typically take 2–4 business days. Full commercials, wedding films, or documentary work generally run 1–3 weeks depending on footage volume and revision rounds." },
+  { "question": "How do I send you my footage?", "answer": "Google Drive, Dropbox, or Frame.io links all work fine. For larger raw camera files, a shared drive or physical drive transfer can be arranged for local clients." },
+  { "question": "How many revisions are included?", "answer": "Every project includes two rounds of revisions. Additional rounds are billed hourly and always confirmed with you before any extra work begins." },
+  { "question": "How is pricing structured?", "answer": "Most projects are quoted flat-rate based on scope, length, and complexity after a short discovery call. Ongoing channel work is available on a monthly retainer." },
+  { "question": "Can you take on rush projects?", "answer": "Yes, depending on current availability. Rush delivery carries a priority fee and is confirmed upfront before any work begins." },
+  { "question": "Who owns the raw and final files?", "answer": "You do. All raw footage and final delivered files remain fully yours, with project files archived on my end for 90 days after delivery." }
+]

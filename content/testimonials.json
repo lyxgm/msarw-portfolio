@@ -1,0 +1,106 @@
+[
+  {
+    "quote": "Some information is shown in English language.",
+    "name": "G. ",
+    "clientfrom": "Fiverr",
+    "image": "",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Deep Understanding",
+      "Exceeded Expectations"
+    ]
+  },
+  {
+    "quote": "Very good quality for the price I paid.",
+    "name": "O.",
+    "clientfrom": "Fiverr",
+    "image": "/images/testimonials/oliverpolli1.jpg",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Politeness",
+      "Level of cooperation",
+      "Deep Understanding",
+      "+1 more dudeeeeee" 
+    ]
+  }, 
+
+
+
+
+  {
+    "quote": "These are just examples.",
+    "name": "M. Z.",
+    "clientfrom": "Fiverr",
+    "image": "",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Deep Understanding",
+      "Exceeded Expectations"
+    ]
+  }, 
+  {
+    "quote": "Delivered exactly what I needed and even improved parts of the original idea.",
+    "name": "James Carter",
+    "clientfrom": "Fiverr",
+    "image": "",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Attention to Detail",
+      "Fast Turnaround",
+      "Deep Understanding"
+    ]
+  },
+  {
+    "quote": "The work was done quickly and with great quality.",
+    "name": "S. L.",
+    "clientfrom": "Fiverr",
+    "image": "",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Fast Turnaround",
+      "Exceeded Expectations"
+    ]
+  },
+  {
+    "quote": "I am very satisfied with the work done. Highly recommended!",
+    "name": "D. K.",
+    "clientfrom": "Fiverr",
+    "image": "",
+    "rating": 5.0,
+    "scores": {
+      "communication": 5,
+      "qualityOfDelivery": 5,
+      "valueOfDelivery": 5
+    },
+    "whatWentWell": [
+      "Politeness",
+      "Level of cooperation",
+      "Deep Understanding"
+    ]
+  }
+]

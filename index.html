@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MSARW — Film Editor & Colorist</title>
+<meta name="description" content="MSARW is a freelance film editor and colorist crafting cinematic stories for brands, artists, and creators." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: '#08090A',
+          panel: '#121215',
+          panel2: '#1B1B1F',
+          ivory: '#F5F2EA',
+          ember: '#FF5A1F',
+          ember2: '#FF8A50',
+          mute: '#84868D',
+          line: 'rgba(245,242,234,0.09)',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+        },
+      }
+    }
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --vh:1vh; }
+  *{ box-sizing:border-box; }
+  html{ background:#08090A; }
+  body{
+    background:#08090A;
+    color:#F5F2EA;
+    font-family:'Inter', sans-serif;
+    cursor:none;
+    overflow-x:hidden;
+  }
+  @media (max-width: 900px){ body{ cursor:auto; } }
+  ::selection{ background:#FF5A1F; color:#08090A; }
+
+  h1,h2,h3,.font-display{ font-family:'Space Grotesk', sans-serif; letter-spacing:-0.02em; }
+  .font-mono{ font-family:'IBM Plex Mono', monospace; }
+
+  /* ---------- grain overlay ---------- */
+  .grain{
+    position:fixed; inset:0; z-index:80; pointer-events:none;
+    opacity:0.045; mix-blend-mode:overlay;
+  }
+
+  /* ---------- custom cursor ---------- */
+  .cursor-dot, .cursor-ring{
+    position:fixed; top:0; left:0; pointer-events:none; z-index:100;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+  }
+  .cursor-dot{ width:6px; height:6px; background:#F5F2EA; }
+  .cursor-ring{
+    width:38px; height:38px; border:1px solid rgba(245,242,234,0.5);
+    transition:width .25s ease, height .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .cursor-ring.hovering{
+    width:76px; height:76px; background:rgba(255,90,31,0.1); border-color:#FF5A1F;
+  }
+  @media (max-width: 900px){ .cursor-dot,.cursor-ring{ display:none; } }
+
+  /* ---------- loader ---------- */
+  #loader{
+    position:fixed; inset:0; z-index:200; background:#08090A;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+  }
+  .aperture{
+    width:120px; height:120px; border-radius:50%;
+    border:1px solid rgba(245,242,234,0.18);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .aperture::before{
+    content:''; position:absolute; inset:14px; border-radius:50%;
+    border:1px solid rgba(255,90,31,0.5);
+  }
+
+  /* ---------- reveal helpers ---------- */
+  .reveal{ opacity:0; transform:translateY(36px); }
+  .reveal-mask{ overflow:hidden; }
+  .reveal-mask > span{ display:inline-block; transform:translateY(110%); }
+
+  /* ---------- section frame ---------- */
+  .section-eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; letter-spacing:.22em;
+    text-transform:uppercase; color:#FF5A1F;
+  }
+
+  /* ---------- magnetic buttons ---------- */
+  .magnetic{ will-change:transform; }
+
+  /* ---------- footage placeholder tint ---------- */
+  .footage{ filter:grayscale(0.55) contrast(1.08) brightness(0.85); transition:filter .6s ease; }
+  .footage:hover{ filter:grayscale(0) contrast(1.05) saturate(1.25) brightness(1); }
+
+  /* ---------- hero canvas ---------- */
+  #hero-canvas{ position:absolute; inset:0; width:100%; height:100%; }
+
+  /* ---------- timeline scrubber (signature element) ---------- */
+  #timeline-bar{
+    position:fixed; left:0; right:0; bottom:0; height:34px; z-index:90;
+    background:rgba(8,9,10,0.82); backdrop-filter:blur(8px);
+    border-top:1px solid var(--line, rgba(245,242,234,0.09));
+    display:flex; align-items:center; padding:0 18px; gap:14px;
+  }
+  #timeline-track{
+    position:relative; flex:1; height:16px; display:flex; align-items:center;
+  }
+  #timeline-ticks{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between;
+    padding:0 1px;
+  }
+  #timeline-ticks span{ width:1px; height:6px; background:rgba(245,242,234,0.18); }
+  #timeline-ticks span:nth-child(5n+1){ height:10px; background:rgba(245,242,234,0.32); }
+  #timeline-rail{ position:absolute; left:0; right:0; height:1px; background:rgba(245,242,234,0.12); }
+  #timeline-fill{ position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,#FF5A1F,#FF8A50); border-radius:2px; opacity:.9; }
+  #timeline-playhead{
+    position:absolute; top:50%; width:2px; height:22px; background:#F5F2EA;
+    transform:translate(-1px,-50%); box-shadow:0 0 8px rgba(255,90,31,0.9);
+  }
+  #timeline-playhead::before{
+    content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid #F5F2EA;
+  }
+
+  /* ---------- before/after slider ---------- */
+  .ba-wrap{ position:relative; overflow:hidden; user-select:none; touch-action:none; }
+  .ba-after{ position:absolute; inset:0; overflow:hidden; }
+  .ba-handle{
+    position:absolute; top:0; bottom:0; width:2px; background:#F5F2EA;
+    left:50%; transform:translateX(-50%); cursor:ew-resize;
+  }
+  .ba-handle-knob{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%; background:#08090A;
+    border:1px solid rgba(245,242,234,0.4); display:flex; align-items:center; justify-content:center;
+  }
+
+  /* ---------- accordion ---------- */
+  .faq-panel{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s cubic-bezier(.65,0,.35,1); }
+  .faq-item.open .faq-panel{ grid-template-rows:1fr; }
+  .faq-panel > div{ overflow:hidden; }
+  .faq-plus{ transition:transform .4s cubic-bezier(.65,0,.35,1); }
+  .faq-item.open .faq-plus{ transform:rotate(135deg); }
+
+  /* ---------- nav overlay ---------- */
+  #nav-overlay{
+    position:fixed; inset:0; z-index:150; background:#08090A;
+    clip-path:circle(0% at calc(100% - 40px) 40px);
+    transition:clip-path .7s cubic-bezier(.75,0,.15,1);
+    pointer-events:none;
+  }
+  #nav-overlay.open{ clip-path:circle(150% at calc(100% - 40px) 40px); pointer-events:auto; }
+
+  /* scroll padding for anchor nav under fixed header */
+  html{ scroll-behavior:auto; }
+
+  ::-webkit-scrollbar{ width:0px; }
+
+  .glass{ background:rgba(18,18,21,0.55); backdrop-filter:blur(14px); border:1px solid rgba(245,242,234,0.08); }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal, .reveal-mask > span{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body class="bg-bg text-ivory font-body antialiased">
+
+<!-- grain -->
+<svg class="grain" width="100%" height="100%">
+  <filter id="noiseFilter">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+    <feColorMatrix type="saturate" values="0"></feColorMatrix>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noiseFilter)"></rect>
+</svg>
+
+<!-- custom cursor -->
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- loader -->
+<div id="loader">
+  <div class="aperture mb-8"></div>
+  <div class="font-mono text-xs tracking-[0.3em] text-mute mb-2">LOADING SEQUENCE</div>
+  <div id="loader-timecode" class="font-mono text-2xl text-ivory">00:00:00:00</div>
+</div>
+
+<!-- nav overlay -->
+<div id="nav-overlay">
+  <div class="h-full w-full flex flex-col items-center justify-center gap-8">
+    <a href="#work" class="nav-link font-display text-5xl md:text-7xl hover:text-ember transition-colors" data-hover>Featured Work</a>
+    <a href="#services" class="nav-link font-display text-5xl md:text-7xl hover:text-ember transition-colors" data-hover>Services</a>
+    <a href="#process" class="nav-link font-display text-5xl md:text-7xl hover:text-ember transition-colors" data-hover>Process</a>
+    <a href="#testimonials" class="nav-link font-display text-5xl md:text-7xl hover:text-ember transition-colors" data-hover>Testimonials</a>
+    <a href="#contact" class="nav-link font-display text-5xl md:text-7xl hover:text-ember transition-colors" data-hover>Contact</a>
+    <div class="font-mono text-xs text-mute mt-10 tracking-widest">HELLO@MSARW.COM — @MSARW.EDITS</div>
+  </div>
+</div>
+
+<!-- header -->
+<header class="fixed top-0 left-0 right-0 z-[110] flex items-center justify-between px-6 md:px-10 py-6">
+  <a href="#top" class="font-display font-semibold text-lg tracking-tight" data-hover>MSARW</a>
+  <button id="navToggle" class="font-mono text-xs tracking-[0.25em] flex items-center gap-3 group" data-hover>
+    <span>MENU</span>
+    <span class="flex flex-col gap-[5px] w-5">
+      <span class="h-px w-full bg-ivory"></span>
+      <span class="h-px w-full bg-ivory"></span>
+    </span>
+  </button>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="relative h-[100svh] w-full overflow-hidden flex flex-col justify-end">
+    <canvas id="hero-canvas"></canvas>
+    <div class="absolute inset-0 bg-gradient-to-b from-bg/10 via-bg/40 to-bg pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-bg/70 via-transparent to-bg/70 pointer-events-none"></div>
+
+    <div class="relative z-10 px-6 md:px-10 pb-16 md:pb-20">
+      <div class="section-eyebrow mb-5 reveal">COMMERCIALS · YOUTUBE · REELS · FILMS · BRAND CONTENT · MUSIC VIDEOS</div>
+      <h1 class="font-display font-semibold leading-[0.95] text-[13vw] md:text-[7.2vw]">
+        <span class="reveal-mask block"><span>I Don't Just Edit Videos.</span></span>
+        <span class="reveal-mask block text-transparent bg-clip-text bg-gradient-to-r from-ember to-ember2"><span>I Craft Stories.</span></span>
+      </h1>
+      <div class="mt-10 flex flex-wrap items-center gap-4 reveal">
+        <a href="#work" class="magnetic px-8 py-4 bg-ember text-bg font-medium rounded-full text-sm tracking-wide" data-hover>View Portfolio</a>
+        <a href="#contact" class="magnetic px-8 py-4 border border-ivory/25 rounded-full text-sm tracking-wide hover:border-ivory/60 transition-colors" data-hover>Let's Work Together</a>
+      </div>
+    </div>
+
+    <div class="absolute bottom-8 right-6 md:right-10 z-10 font-mono text-xs text-mute flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-ember animate-pulse"></span> REC — SHOWREEL 2026
+    </div>
+  </section>
+
+  <!-- ============ WHO I AM ============ -->
+  <section class="px-6 md:px-10 py-28 md:py-40 max-w-7xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">BEHIND THE CUT</div>
+    <div class="grid md:grid-cols-12 gap-10 md:gap-16 items-end">
+      <div class="md:col-span-4 order-2 md:order-1">
+        <div class="footage rounded-2xl overflow-hidden aspect-[4/5] reveal">
+          <img src="https://picsum.photos/id/1005/700/900" alt="Portrait of MSARW" class="w-full h-full object-cover" />
+        </div>
+        <p class="mt-6 text-mute text-sm leading-relaxed reveal">
+          Eight years behind the timeline. Formerly cutting for two agencies in Pakistan,
+          now working directly with brands, artists, and couples who want their footage
+          to feel like it was always meant to move.
+        </p>
+      </div>
+      <div class="md:col-span-8 order-1 md:order-2">
+        <h2 class="font-display font-medium text-4xl md:text-6xl leading-[1.05] reveal">
+          I turn ordinary footage into <span class="text-ember">unforgettable</span> stories.
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED WORK ============ -->
+  <section id="work" class="px-6 md:px-10 py-28 md:py-40 max-w-7xl mx-auto">
+    <div class="flex items-end justify-between flex-wrap gap-6 mb-16">
+      <div>
+        <div class="section-eyebrow mb-6 reveal">SELECTED CUTS</div>
+        <h2 class="font-display font-medium text-4xl md:text-6xl reveal">Work That Speaks<br/>in Frames.</h2>
+      </div>
+      <p class="max-w-xs text-mute text-sm reveal">Hover a frame to preview the grade. Click to open the full edit breakdown.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+      <!-- card template x6 -->
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1015/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">BRAND FILM — DAVINCI RESOLVE</div>
+          <div class="font-display text-2xl">AURORA</div>
+        </div>
+      </a>
+
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1039/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">DOCUMENTARY SHORT — PREMIERE PRO</div>
+          <div class="font-display text-2xl">NIGHT MARKET</div>
+        </div>
+      </a>
+
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1074/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">PRODUCT COMMERCIAL — AFTER EFFECTS</div>
+          <div class="font-display text-2xl">VELOCITY</div>
+        </div>
+      </a>
+
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1080/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">WEDDING FILM — PREMIERE PRO</div>
+          <div class="font-display text-2xl">THE VOWS</div>
+        </div>
+      </a>
+
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1062/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">MUSIC VIDEO — DAVINCI RESOLVE</div>
+          <div class="font-display text-2xl">SIGNAL</div>
+        </div>
+      </a>
+
+      <a href="#" data-hover class="project-card group relative rounded-2xl overflow-hidden aspect-[16/10] reveal">
+        <img src="https://picsum.photos/id/1071/900/560" class="footage w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/10 to-transparent"></div>
+        <div class="absolute top-5 right-5 w-11 h-11 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#F5F2EA"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="absolute left-6 bottom-6 right-6 translate-y-3 group-hover:translate-y-0 transition-transform duration-500">
+          <div class="font-mono text-[11px] tracking-widest text-ember mb-1">STARTUP REEL — AFTER EFFECTS</div>
+          <div class="font-display text-2xl">LAUNCH DAY</div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section id="process" class="px-6 md:px-10 py-28 md:py-40 max-w-5xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">HOW A PROJECT MOVES</div>
+    <h2 class="font-display font-medium text-4xl md:text-6xl mb-20 reveal">From Brief to Broadcast.</h2>
+
+    <div class="relative pl-10 md:pl-16">
+      <div class="absolute left-[3px] md:left-[7px] top-2 bottom-2 w-px bg-line">
+        <div id="process-line" class="absolute top-0 left-0 w-full bg-ember" style="height:0%"></div>
+      </div>
+
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">01 / CLIENT BRIEF</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Understanding the story you need told.</h3>
+        <p class="text-mute text-sm max-w-lg">A short call or brief to pin down audience, tone, deadline, and deliverables before a single clip is touched.</p>
+      </div>
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">02 / PLANNING</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Structuring the edit before the timeline opens.</h3>
+        <p class="text-mute text-sm max-w-lg">Footage is logged, selects are marked, and a rough structure is mapped so the first cut has direction, not guesswork.</p>
+      </div>
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">03 / EDITING</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Building rhythm, pace, and narrative flow.</h3>
+        <p class="text-mute text-sm max-w-lg">The assembly becomes a story — cuts land on beats, pacing tightens, and the piece finds its shape.</p>
+      </div>
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">04 / COLOR GRADING</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Giving every frame a consistent mood.</h3>
+        <p class="text-mute text-sm max-w-lg">Exposure, contrast, and tone are matched shot to shot in DaVinci Resolve for a unified, cinematic look.</p>
+      </div>
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">05 / SOUND DESIGN</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Mixing dialogue, music, and texture.</h3>
+        <p class="text-mute text-sm max-w-lg">Levels are balanced, music is scored to picture, and small foley details are layered in so the piece feels alive.</p>
+      </div>
+      <div class="process-step reveal relative pb-16">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">06 / MOTION GRAPHICS</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Adding titles, transitions, and polish.</h3>
+        <p class="text-mute text-sm max-w-lg">Type, logos, and graphic transitions are animated in After Effects to match the pacing already set.</p>
+      </div>
+      <div class="process-step reveal relative">
+        <div class="absolute -left-10 md:-left-16 top-1 w-2 h-2 rounded-full bg-ember"></div>
+        <div class="font-mono text-xs text-ember mb-2">07 / DELIVERY</div>
+        <h3 class="font-display text-2xl md:text-3xl mb-2">Exporting, reviewing, and handing it off.</h3>
+        <p class="text-mute text-sm max-w-lg">Final files are rendered to spec for every platform, with two rounds of revisions built in before delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BEFORE / AFTER ============ -->
+  <section class="px-6 md:px-10 py-28 md:py-40 max-w-6xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">THE TRANSFORMATION</div>
+    <h2 class="font-display font-medium text-4xl md:text-6xl mb-14 reveal">Same Footage.<br/>Different Story.</h2>
+
+    <div class="ba-wrap rounded-2xl aspect-[16/9] reveal" id="baWrap">
+      <img src="https://picsum.photos/id/1040/1400/800" class="w-full h-full object-cover" style="filter:grayscale(0.3) saturate(0.5) brightness(0.75) sepia(0.15) hue-rotate(160deg);" alt="Raw footage" />
+      <div class="ba-after" id="baAfter" style="width:50%;">
+        <img src="https://picsum.photos/id/1040/1400/800" class="w-full h-full object-cover" style="filter:saturate(1.35) contrast(1.15) brightness(1.05) sepia(0.08) hue-rotate(-8deg); width:200%; max-width:none;" alt="Graded footage" />
+      </div>
+      <div class="ba-handle" id="baHandle" style="left:50%;">
+        <div class="ba-handle-knob">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5F2EA" stroke-width="2"><path d="M8 6L2 12L8 18"/><path d="M16 6L22 12L16 18"/></svg>
+        </div>
+      </div>
+      <div class="absolute top-4 left-4 font-mono text-[11px] tracking-widest bg-bg/60 px-3 py-1.5 rounded-full backdrop-blur">RAW</div>
+      <div class="absolute top-4 right-4 font-mono text-[11px] tracking-widest bg-bg/60 px-3 py-1.5 rounded-full backdrop-blur">GRADED</div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section id="services" class="px-6 md:px-10 py-28 md:py-40 max-w-7xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">WHAT I OFFER</div>
+    <h2 class="font-display font-medium text-4xl md:text-6xl mb-16 reveal">Every Format.<br/>One Standard.</h2>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-line rounded-2xl overflow-hidden reveal">
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Commercial Editing</div>
+        <p class="text-mute text-sm">Fast, punchy cuts built to hold attention across every platform.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">YouTube Editing</div>
+        <p class="text-mute text-sm">Retention-driven pacing, pattern interrupts, and consistent channel style.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Wedding Films</div>
+        <p class="text-mute text-sm">Emotional, cinematic storytelling that holds up for a lifetime of rewatching.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Music Videos</div>
+        <p class="text-mute text-sm">Beat-synced cutting and visual energy that matches the track.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Reels &amp; TikTok</div>
+        <p class="text-mute text-sm">Short-form edits built around hooks, captions, and native platform pacing.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Corporate Videos</div>
+        <p class="text-mute text-sm">Clean, credible storytelling for internal comms and executive content.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Real Estate Videos</div>
+        <p class="text-mute text-sm">Smooth walkthroughs and drone footage cut to sell the space, not just show it.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Motion Graphics</div>
+        <p class="text-mute text-sm">Custom titles, lower thirds, and animated logo reveals built to spec.</p>
+      </div>
+      <div class="bg-panel p-8 hover:bg-panel2 transition-colors">
+        <div class="font-display text-xl mb-2">Color Grading</div>
+        <p class="text-mute text-sm">A consistent, cinematic look shot-matched across your entire timeline.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TOOLSET ============ -->
+  <section class="px-6 md:px-10 py-24 border-y border-line">
+    <div class="max-w-7xl mx-auto">
+      <div class="section-eyebrow mb-10 reveal">THE TOOLSET</div>
+      <div class="flex flex-wrap gap-4 md:gap-6 reveal">
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>Premiere Pro</div>
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>After Effects</div>
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>DaVinci Resolve</div>
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>Photoshop</div>
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>Audition</div>
+        <div class="tool-badge px-6 py-4 rounded-full border border-line font-display text-lg hover:border-ember hover:text-ember transition-colors" data-hover>Blender</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="px-6 md:px-10 py-28 md:py-40 max-w-7xl mx-auto">
+    <div class="section-eyebrow mb-16 reveal">BY THE NUMBERS</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+      <div class="reveal">
+        <div class="font-display text-5xl md:text-6xl text-ember"><span class="counter" data-target="250">0</span>+</div>
+        <div class="font-mono text-xs text-mute mt-3 tracking-widest">PROJECTS COMPLETED</div>
+      </div>
+      <div class="reveal">
+        <div class="font-display text-5xl md:text-6xl text-ember"><span class="counter" data-target="18">0</span>M+</div>
+        <div class="font-mono text-xs text-mute mt-3 tracking-widest">VIEWS GENERATED</div>
+      </div>
+      <div class="reveal">
+        <div class="font-display text-5xl md:text-6xl text-ember"><span class="counter" data-target="150">0</span>+</div>
+        <div class="font-mono text-xs text-mute mt-3 tracking-widest">HAPPY CLIENTS</div>
+      </div>
+      <div class="reveal">
+        <div class="font-display text-5xl md:text-6xl text-ember"><span class="counter" data-target="8">0</span>+</div>
+        <div class="font-mono text-xs text-mute mt-3 tracking-widest">YEARS EXPERIENCE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section id="testimonials" class="py-28 md:py-40">
+    <div class="px-6 md:px-10 max-w-7xl mx-auto mb-14">
+      <div class="section-eyebrow mb-6 reveal">WHAT CLIENTS SAY</div>
+      <h2 class="font-display font-medium text-4xl md:text-6xl reveal">Trusted by People<br/>Who Notice Detail.</h2>
+    </div>
+    <div class="flex gap-6 overflow-x-auto px-6 md:px-10 pb-6 snap-x snap-mandatory" style="scrollbar-width:none;">
+      <div class="snap-start shrink-0 w-[85vw] md:w-[420px] glass rounded-2xl p-8 reveal">
+        <div class="text-ember text-2xl mb-4 font-display">"</div>
+        <p class="text-lg leading-relaxed mb-8">MSARW took four hours of raw drone and interview footage and gave us back something that felt like a Netflix trailer. Our launch video outperformed every ad we've ever run.</p>
+        <div class="flex items-center gap-3">
+          <img src="https://picsum.photos/id/64/80/80" class="w-10 h-10 rounded-full object-cover footage" />
+          <div>
+            <div class="text-sm font-medium">Maren Okafor</div>
+            <div class="text-xs text-mute">Founder, Northloop Goods</div>
+          </div>
+        </div>
+      </div>
+      <div class="snap-start shrink-0 w-[85vw] md:w-[420px] glass rounded-2xl p-8 reveal">
+        <div class="text-ember text-2xl mb-4 font-display">"</div>
+        <p class="text-lg leading-relaxed mb-8">Our wedding film still makes my mother cry two years later. MSARW understood exactly which moments mattered without us having to explain a single one.</p>
+        <div class="flex items-center gap-3">
+          <img src="https://picsum.photos/id/91/80/80" class="w-10 h-10 rounded-full object-cover footage" />
+          <div>
+            <div class="text-sm font-medium">Priya &amp; Thomas Rowe</div>
+            <div class="text-xs text-mute">Wedding Clients</div>
+          </div>
+        </div>
+      </div>
+      <div class="snap-start shrink-0 w-[85vw] md:w-[420px] glass rounded-2xl p-8 reveal">
+        <div class="text-ember text-2xl mb-4 font-display">"</div>
+        <p class="text-lg leading-relaxed mb-8">Retention on our channel jumped almost 40% after switching editors. MSARW edits for how people actually watch, not how a script reads on paper.</p>
+        <div class="flex items-center gap-3">
+          <img src="https://picsum.photos/id/177/80/80" class="w-10 h-10 rounded-full object-cover footage" />
+          <div>
+            <div class="text-sm font-medium">Devon Marsh</div>
+            <div class="text-xs text-mute">YouTube Creator, 640K subs</div>
+          </div>
+        </div>
+      </div>
+      <div class="snap-start shrink-0 w-[85vw] md:w-[420px] glass rounded-2xl p-8 reveal">
+        <div class="text-ember text-2xl mb-4 font-display">"</div>
+        <p class="text-lg leading-relaxed mb-8">Fast turnaround, zero hand-holding required, and the color grade alone made our product look twice as expensive as it is.</p>
+        <div class="flex items-center gap-3">
+          <img src="https://picsum.photos/id/219/80/80" class="w-10 h-10 rounded-full object-cover footage" />
+          <div>
+            <div class="text-sm font-medium">Sara Lindqvist</div>
+            <div class="text-xs text-mute">Creative Director, Fjord Studio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="px-6 md:px-10 py-28 md:py-40 max-w-4xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">COMMON QUESTIONS</div>
+    <h2 class="font-display font-medium text-4xl md:text-6xl mb-16 reveal">Before You Reach Out.</h2>
+
+    <div class="divide-y divide-line border-t border-b border-line reveal">
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">What's the typical turnaround time?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">Short-form edits typically take 2–4 business days. Full commercials, wedding films, or documentary work generally run 1–3 weeks depending on footage volume and revision rounds.</p></div></div>
+      </div>
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">How do I send you my footage?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">Google Drive, Dropbox, or Frame.io links all work fine. For larger raw camera files, a shared drive or physical drive transfer can be arranged for local clients.</p></div></div>
+      </div>
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">How many revisions are included?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">Every project includes two rounds of revisions. Additional rounds are billed hourly and always confirmed with you before any extra work begins.</p></div></div>
+      </div>
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">How is pricing structured?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">Most projects are quoted flat-rate based on scope, length, and complexity after a short discovery call. Ongoing channel work is available on a monthly retainer.</p></div></div>
+      </div>
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">Can you take on rush projects?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">Yes, depending on current availability. Rush delivery carries a priority fee and is confirmed upfront before any work begins.</p></div></div>
+      </div>
+      <div class="faq-item py-2">
+        <button class="faq-toggle w-full flex items-center justify-between py-6 text-left" data-hover>
+          <span class="font-display text-xl md:text-2xl pr-8">Who owns the raw and final files?</span>
+          <span class="faq-plus shrink-0 w-8 h-8 rounded-full border border-line flex items-center justify-center text-lg">+</span>
+        </button>
+        <div class="faq-panel"><div><p class="text-mute pb-6 pr-10 leading-relaxed">You do. All raw footage and final delivered files remain fully yours, with project files archived on my end for 90 days after delivery.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA / CONTACT ============ -->
+  <section id="contact" class="px-6 md:px-10 py-28 md:py-40 max-w-6xl mx-auto">
+    <div class="section-eyebrow mb-6 reveal">GET IN TOUCH</div>
+    <h2 class="font-display font-medium text-5xl md:text-7xl mb-16 reveal leading-[1.02]">Let's Create Something<br/><span class="text-ember">Cinematic.</span></h2>
+
+    <div class="grid md:grid-cols-2 gap-16">
+      <div class="reveal">
+        <div class="flex flex-col gap-5">
+          <a href="mailto:hello@msarw.com" class="magnetic flex items-center justify-between border-b border-line pb-4 group" data-hover>
+            <span class="font-display text-2xl md:text-3xl group-hover:text-ember transition-colors">Email</span>
+            <span class="text-mute font-mono text-sm">hello@msarw.com</span>
+          </a>
+          <a href="#" class="magnetic flex items-center justify-between border-b border-line pb-4 group" data-hover>
+            <span class="font-display text-2xl md:text-3xl group-hover:text-ember transition-colors">Instagram</span>
+            <span class="text-mute font-mono text-sm">@msarw.edits</span>
+          </a>
+          <a href="#" class="magnetic flex items-center justify-between border-b border-line pb-4 group" data-hover>
+            <span class="font-display text-2xl md:text-3xl group-hover:text-ember transition-colors">LinkedIn</span>
+            <span class="text-mute font-mono text-sm">/in/msarw</span>
+          </a>
+          <a href="#" class="magnetic flex items-center justify-between border-b border-line pb-4 group" data-hover>
+            <span class="font-display text-2xl md:text-3xl group-hover:text-ember transition-colors">WhatsApp</span>
+            <span class="text-mute font-mono text-sm">+1 (310) 555-0148</span>
+          </a>
+        </div>
+      </div>
+
+      <form id="contactForm" class="reveal flex flex-col gap-5">
+        <div>
+          <label class="font-mono text-[11px] tracking-widest text-mute">NAME</label>
+          <input required type="text" name="name" class="w-full bg-transparent border-b border-line focus:border-ember outline-none py-3 text-lg transition-colors" />
+        </div>
+        <div>
+          <label class="font-mono text-[11px] tracking-widest text-mute">EMAIL</label>
+          <input required type="email" name="email" class="w-full bg-transparent border-b border-line focus:border-ember outline-none py-3 text-lg transition-colors" />
+        </div>
+        <div>
+          <label class="font-mono text-[11px] tracking-widest text-mute">PROJECT TYPE</label>
+          <select name="type" class="w-full bg-transparent border-b border-line focus:border-ember outline-none py-3 text-lg transition-colors">
+            <option class="bg-panel" value="Commercial">Commercial</option>
+            <option class="bg-panel" value="YouTube">YouTube</option>
+            <option class="bg-panel" value="Wedding">Wedding</option>
+            <option class="bg-panel" value="Music Video">Music Video</option>
+            <option class="bg-panel" value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-mono text-[11px] tracking-widest text-mute">MESSAGE</label>
+          <textarea rows="3" name="message" class="w-full bg-transparent border-b border-line focus:border-ember outline-none py-3 text-lg transition-colors resize-none"></textarea>
+        </div>
+        <button type="submit" class="magnetic mt-4 px-8 py-4 bg-ember text-bg font-medium rounded-full text-sm tracking-wide self-start" data-hover>Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="px-6 md:px-10 py-10 border-t border-line flex flex-wrap items-center justify-between gap-4">
+    <div class="font-mono text-[11px] text-mute tracking-widest">© 2026 MSARW — ALL FRAMES RESERVED</div>
+    <button id="backToTop" class="font-mono text-[11px] text-mute tracking-widest hover:text-ember transition-colors" data-hover>BACK TO TOP ↑</button>
+  </footer>
+
+</main>
+
+<!-- timeline scrubber (signature element) -->
+<div id="timeline-bar">
+  <div class="font-mono text-[11px] text-mute hidden sm:block">TIMELINE</div>
+  <div id="timeline-track">
+    <div id="timeline-rail"></div>
+    <div id="timeline-fill"></div>
+    <div id="timeline-ticks">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div id="timeline-playhead" style="left:0%"></div>
+  </div>
+  <div id="timeline-code" class="font-mono text-[11px] text-ivory w-[92px] text-right">00:00:00:00</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- Loader ---------------- */
+  const loader = document.getElementById('loader');
+  const loaderTC = document.getElementById('loader-timecode');
+  let frame = 0;
+  const loaderInterval = setInterval(() => {
+    frame += 3;
+    const f = frame % 24, s = Math.floor(frame/24)%60, m = Math.floor(frame/1440);
+    loaderTC.textContent = `00:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(f).padStart(2,'0')}`;
+    if (frame > 60) clearInterval(loaderInterval);
+  }, 40);
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      gsap.to(loader, {
+        duration: 0.9, opacity: 0, ease: 'power2.inOut',
+        onComplete: () => { loader.style.display = 'none'; document.body.style.overflow=''; introTimeline(); }
+      });
+    }, 900);
+  });
+
+  /* ---------------- Custom cursor ---------------- */
+  const dot = document.getElementById('cursorDot');
+  const ring = document.getElementById('cursorRing');
+  if (window.matchMedia('(min-width: 900px)').matches) {
+    let mx=0,my=0, rx=0, ry=0;
+    window.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px'; });
+    gsap.ticker.add(() => {
+      rx += (mx-rx)*0.18; ry += (my-ry)*0.18;
+      ring.style.left = rx+'px'; ring.style.top = ry+'px';
+    });
+    document.querySelectorAll('[data-hover]').forEach(el => {
+      el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+    });
+  }
+
+  /* ---------------- Nav overlay ---------------- */
+  const navToggle = document.getElementById('navToggle');
+  const navOverlay = document.getElementById('nav-overlay');
+  navToggle.addEventListener('click', () => navOverlay.classList.toggle('open'));
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => navOverlay.classList.remove('open')));
+
+  /* ---------------- Magnetic buttons ---------------- */
+  if (!reduceMotion) {
+    document.querySelectorAll('.magnetic').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const r = btn.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width/2;
+        const y = e.clientY - r.top - r.height/2;
+        gsap.to(btn, { x: x*0.28, y: y*0.35, duration: 0.4, ease:'power3.out' });
+      });
+      btn.addEventListener('mouseleave', () => gsap.to(btn, { x:0, y:0, duration:0.5, ease:'elastic.out(1,0.4)' }));
+    });
+  }
+
+  /* ---------------- Lenis smooth scroll + GSAP ScrollTrigger ---------------- */
+  gsap.registerPlugin(ScrollTrigger);
+  let lenis;
+  if (!reduceMotion && window.Lenis) {
+    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  /* ---------------- Reveal animations ---------------- */
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.to(el, {
+      opacity:1, y:0, duration:1, ease:'power3.out',
+      scrollTrigger:{ trigger:el, start:'top 88%' }
+    });
+  });
+  gsap.utils.toArray('.reveal-mask > span').forEach((el,i) => {
+    gsap.to(el, {
+      y:'0%', duration:1.1, ease:'power4.out', delay:i*0.08,
+      scrollTrigger:{ trigger:el, start:'top 95%' }
+    });
+  });
+
+  function introTimeline(){
+    gsap.utils.toArray('#top .reveal, #top .reveal-mask > span').forEach((el,i)=>{
+      gsap.to(el, { opacity:1, y:0, duration:1.1, ease:'power3.out', delay:0.1+i*0.06 });
+    });
+  }
+
+  /* ---------------- Process line draw ---------------- */
+  const processSection = document.getElementById('process');
+  const processLine = document.getElementById('process-line');
+  if (processSection) {
+    gsap.to(processLine, {
+      height: '100%', ease:'none',
+      scrollTrigger:{ trigger: processSection, start:'top 60%', end:'bottom 70%', scrub:0.6 }
+    });
+  }
+
+  /* ---------------- Counters ---------------- */
+  gsap.utils.toArray('.counter').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    ScrollTrigger.create({
+      trigger: el, start:'top 90%', once:true,
+      onEnter: () => {
+        gsap.fromTo(el, { textContent:0 }, {
+          textContent: target, duration: 1.6, ease:'power2.out', snap:{textContent:1},
+          onUpdate: function(){ el.textContent = Math.floor(el.textContent); }
+        });
+      }
+    });
+  });
+
+  /* ---------------- FAQ accordion ---------------- */
+  document.querySelectorAll('.faq-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  /* ---------------- Before / After slider ---------------- */
+  const baWrap = document.getElementById('baWrap');
+  const baAfter = document.getElementById('baAfter');
+  const baHandle = document.getElementById('baHandle');
+  let dragging = false;
+  function setBA(clientX){
+    const r = baWrap.getBoundingClientRect();
+    let pct = ((clientX - r.left) / r.width) * 100;
+    pct = Math.max(0, Math.min(100, pct));
+    baAfter.style.width = pct + '%';
+    baHandle.style.left = pct + '%';
+  }
+  baHandle.addEventListener('pointerdown', () => dragging = true);
+  window.addEventListener('pointerup', () => dragging = false);
+  window.addEventListener('pointermove', e => { if(dragging) setBA(e.clientX); });
+  baWrap.addEventListener('click', e => setBA(e.clientX));
+
+  /* ---------------- Timeline scrubber (signature) ---------------- */
+  const fill = document.getElementById('timeline-fill');
+  const playhead = document.getElementById('timeline-playhead');
+  const code = document.getElementById('timeline-code');
+  function updateTimeline(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
+    fill.style.width = (pct*100) + '%';
+    playhead.style.left = (pct*100) + '%';
+    const totalFrames = Math.floor(pct * 3600); // fake 2:30 runtime at 24fps
+    const f = totalFrames % 24;
+    const s = Math.floor(totalFrames/24) % 60;
+    const m = Math.floor(totalFrames/1440);
+    code.textContent = `00:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(f).padStart(2,'0')}`;
+  }
+  window.addEventListener('scroll', updateTimeline);
+  updateTimeline();
+
+  /* ---------------- Back to top ---------------- */
+  document.getElementById('backToTop').addEventListener('click', () => {
+    if (lenis) lenis.scrollTo(0); else window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  /* ---------------- Contact form -> mailto ---------------- */
+  document.getElementById('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const subject = encodeURIComponent(`New project inquiry — ${fd.get('type')}`);
+    const body = encodeURIComponent(`Name: ${fd.get('name')}\nEmail: ${fd.get('email')}\nProject type: ${fd.get('type')}\n\n${fd.get('message')}`);
+    window.location.href = `mailto:hello@msarw.com?subject=${subject}&body=${body}`;
+  });
+
+  /* ---------------- Hero canvas: cinematic gradient showreel placeholder ---------------- */
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){ canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let t = 0;
+  const bands = [
+    {c:'#3a2a20'}, {c:'#1c1f24'}, {c:'#241814'}, {c:'#151517'}
+  ];
+  function drawHero(){
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const grd = ctx.createLinearGradient(0,0,w,h);
+    grd.addColorStop(0, '#1a1210');
+    grd.addColorStop(0.5, '#0d0d0f');
+    grd.addColorStop(1, '#08090A');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0,0,w,h);
+
+    // moving light leak / lens flare blob
+    const lx = w*0.75 + Math.sin(t*0.4)*60;
+    const ly = h*0.3 + Math.cos(t*0.3)*40;
+    const rg = ctx.createRadialGradient(lx,ly,0,lx,ly,w*0.4);
+    rg.addColorStop(0, 'rgba(255,90,31,0.35)');
+    rg.addColorStop(1, 'rgba(255,90,31,0)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(0,0,w,h);
+
+    const lx2 = w*0.2 + Math.cos(t*0.25)*50;
+    const ly2 = h*0.7 + Math.sin(t*0.2)*50;
+    const rg2 = ctx.createRadialGradient(lx2,ly2,0,lx2,ly2,w*0.3);
+    rg2.addColorStop(0, 'rgba(120,140,255,0.12)');
+    rg2.addColorStop(1, 'rgba(120,140,255,0)');
+    ctx.fillStyle = rg2;
+    ctx.fillRect(0,0,w,h);
+
+    // subtle horizontal scan bands (film timeline motif)
+    ctx.globalAlpha = 0.05;
+    for (let i=0;i<6;i++){
+      const y = ((t*18 + i*160) % (h+160)) - 80;
+      ctx.fillStyle = i%2===0 ? '#F5F2EA' : '#FF5A1F';
+      ctx.fillRect(0, y, w, 2);
+    }
+    ctx.globalAlpha = 1;
+
+    t += 0.008;
+    requestAnimationFrame(drawHero);
+  }
+  drawHero();
+});
+</script>
+
+</body>
+</html>
