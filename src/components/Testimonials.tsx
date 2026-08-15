@@ -76,7 +76,7 @@ export default function Testimonials() {
 
                 {/* Quote */}
                 <blockquote className="text-[15px] md:text-base leading-7 italic text-ivory mb-4">
-                  "{t.quote}"
+                  &ldquo;{t.quote}&rdquo;
                 </blockquote>
 
                 <div className="border-t border-ivory/5" />
