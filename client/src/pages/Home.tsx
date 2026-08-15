@@ -20,11 +20,11 @@ const services = [
   ["08", "Documentary & Short Films", "Story-driven editing with cinematic pacing, immersive sound design, and impactful visual storytelling."],
   ["09", "Custom Projects", "Tailored edits that match your vision, goals, and unique project requirements."],
 ];
-const previewVideo = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+const previewVideo = "/assets/project-preview-flower.mp4";
 const projects: [string, string, string, string, string][] = [
-  ["AURORA", "Brand Film", "DaVinci Resolve", "https://picsum.photos/id/1015/900/560", previewVideo],
-  ["NIGHT MARKET", "Documentary Short", "Premiere Pro", "https://picsum.photos/id/1039/900/560", previewVideo],
-  ["SIGNAL", "Music Video", "DaVinci Resolve", "https://picsum.photos/id/1062/900/560", previewVideo],
+  ["AURORA", "Brand Film", "DaVinci Resolve", "/assets/project-aurora.jpg", previewVideo],
+  ["NIGHT MARKET", "Documentary Short", "Premiere Pro", "/assets/project-night-market.jpg", previewVideo],
+  ["SIGNAL", "Music Video", "DaVinci Resolve", "/assets/project-signal.jpg", previewVideo],
 ];
 const process = [
   ["01", "Client Brief", "Understanding the story you need told.", "A short call or brief to pin down audience, tone, deadline, and deliverables before a single clip is touched."],
@@ -55,7 +55,7 @@ function SectionLabel({ children, noDot = false }: { children: React.ReactNode; 
 }
 
 function MSARWArrow() {
-  return <img className="msarw-arrow" src="/manus-storage/msarw-custom-arrow_3d118203.png" alt="" aria-hidden="true" />;
+  return <img className="msarw-arrow" src="/assets/msarw-custom-arrow.png" alt="" aria-hidden="true" />;
 }
 
 function ProjectCard({ project, index, onPlay }: { project: [string, string, string, string, string]; index: number; onPlay: (video: string, title: string) => void }) {
@@ -211,7 +211,7 @@ export default function Home() {
   return (
     <div className={`site-shell ${loadingState === "done" ? "is-ready" : "is-loading"}`} onClick={handleSiteClick}>
       <div className={`loading-screen ${loadingState === "loading" ? "is-visible" : loadingState === "fading" ? "is-fading" : "is-hidden"}`} style={{ "--loading-blur": `${Math.max(0, 12 - loadingProgress * 0.12)}px` } as CSSProperties} aria-hidden={loadingState === "done"}>
-        <img className="loading-logo" src="/manus-storage/msarw-lettermark-isolated_14da4c21.png" alt="MSARW" />
+        <img className="loading-logo" src="/assets/msarw-lettermark-isolated.png" alt="MSARW" />
         <p className="loading-progress" aria-live="polite">{loadingProgress}%</p>
         <p className="loading-label">LOADING</p>
         <span className="loading-rule" />
@@ -219,7 +219,7 @@ export default function Home() {
       <div className="click-bubble-layer" aria-hidden="true">{clickBubbles.map((bubble) => <span key={bubble.id} className="click-bubble" style={{ left: bubble.x, top: bubble.y }} />)}</div>
       <InteractiveBackdrop />
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="MSARW home"><img className="brand-logo" src="/manus-storage/msarw-lettermark-isolated_14da4c21.png" alt="MSARW" /></a>
+        <a className="brand" href="#top" aria-label="MSARW home"><img className="brand-logo" src="/assets/msarw-lettermark-isolated.png" alt="MSARW" /></a>
         <nav><a className={activeNav === "work" ? "is-active" : undefined} aria-current={activeNav === "work" ? "page" : undefined} href="#work" onClick={() => setActiveNav("work")}>Work</a><a className={activeNav === "services" ? "is-active" : undefined} aria-current={activeNav === "services" ? "page" : undefined} href="#services" onClick={() => setActiveNav("services")}>Services</a><a className={activeNav === "contact" ? "is-active" : undefined} aria-current={activeNav === "contact" ? "page" : undefined} href="#contact" onClick={scrollToContact}>Contact</a></nav>
         <a className="mini-pill" href="#contact" onClick={scrollToContact}>Start a Project</a>
       </header>
@@ -233,7 +233,7 @@ export default function Home() {
             <h1><span>I Don’t Just<span className="hero-mobile-break"><br /></span> Edit Videos.</span><em>I Craft Stories.</em></h1>
             <div className="hero-actions"><a className="primary-pill" href="#work">View Portfolio</a><a className="text-link" href="#contact" onClick={scrollToContact}>Let’s Work Together</a></div>
           </div>
-          <a className="scroll-cue" href="#intro" aria-label="Scroll to the introduction"><span>SCROLL TO EXPLORE</span><img className="scroll-cue-arrow" src="/manus-storage/msarw-custom-arrow_3d118203.png" alt="" aria-hidden="true" /></a>
+          <a className="scroll-cue" href="#intro" aria-label="Scroll to the introduction"><span>SCROLL TO EXPLORE</span><img className="scroll-cue-arrow" src="/assets/msarw-custom-arrow.png" alt="" aria-hidden="true" /></a>
           <div className="hero-meta"><span>AVAILABLE FOR SELECT PROJECTS</span><span>2026</span><span className="meta-line" /></div>
         </section>
 
