@@ -24,7 +24,7 @@ const previewVideo = "/assets/project-preview-flower.mp4";
 const projects: [string, string, string, string, string][] = [
   ["AURORA", "Brand Film", "DaVinci Resolve", "/assets/project-aurora.jpg", previewVideo],
   ["NIGHT MARKET", "Documentary Short", "Premiere Pro", "/assets/project-night-market.jpg", previewVideo],
-  ["SIGNAL", "Music Video", "DaVinci Resolve", "/assets/project-signal.jpg", previewVideo],
+  ["SIGNAL", "Music Video", "DaVinci Resolve", "/assets/project-signal.jpg", "/assets/project-reel-signal.mp4"],
 ];
 const process = [
   ["01", "Client Brief", "Understanding the story you need told.", "A short call or brief to pin down audience, tone, deadline, and deliverables before a single clip is touched."],
@@ -58,7 +58,7 @@ function MSARWArrow() {
   return <img className="msarw-arrow" src="/assets/msarw-custom-arrow.png" alt="" aria-hidden="true" />;
 }
 
-function ProjectCard({ project, index, onPlay }: { project: [string, string, string, string, string]; index: number; onPlay: (video: string, title: string) => void }) {
+function ProjectCard({ project, index, onPlay }: { project: [string, string, string, string, string]; index: number; onPlay: (video: string, title: string, isReel: boolean) => void }) {
   const [title, category, software, image, video] = project;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -73,12 +73,20 @@ function ProjectCard({ project, index, onPlay }: { project: [string, string, str
     if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
   };
   useEffect(() => () => { if (timerRef.current) window.clearTimeout(timerRef.current); }, []);
-  return <article className="project-card" onMouseEnter={startPreview} onMouseLeave={stopPreview} onFocus={startPreview} onBlur={stopPreview}>
+  const openProject = (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onPlay(video, title, video.includes("reel"));
+  };
+  const handleProjectKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Enter" || event.key === " ") openProject(event as unknown as React.MouseEvent<HTMLElement>);
+  };
+  return <article className={`project-card ${video.includes("reel") ? "project-card--reel" : ""}`} role="button" tabIndex={0} onClick={openProject} onKeyDown={handleProjectKeyDown} onMouseEnter={startPreview} onMouseLeave={stopPreview} onFocus={startPreview} onBlur={stopPreview}>
     <div className="project-image" style={{ backgroundImage: `url(${image})` }}>
       <video ref={videoRef} className="project-preview" src={video} muted loop playsInline preload="metadata" aria-hidden="true" />
       <div className="project-number">0{index + 1}</div>
       <div className="preview-label">HOVER PREVIEW / 05 SEC</div>
-      <button type="button" className="play-button" aria-label={`Play ${title}`} onClick={() => onPlay(video, title)}><Play size={18} fill="currentColor" /></button>
+      <button type="button" className="play-button" aria-label={`Play ${title}`} onClick={openProject}><Play size={18} fill="currentColor" /></button>
     </div>
     <div className="project-info"><div><h3>{title}</h3><p>{category}</p><div className="project-timeline"><span /><span /><span /><span /><span /></div></div><Pill dark>{software}</Pill></div>
   </article>;
@@ -88,7 +96,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [openService, setOpenService] = useState<number | null>(null);
   const [sent, setSent] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<{ src: string; title: string } | null>(null);
+  const [activeVideo, setActiveVideo] = useState<{ src: string; title: string; isReel: boolean } | null>(null);
   const [activeTool, setActiveTool] = useState(0);
   const [activeSkill, setActiveSkill] = useState(0);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -99,6 +107,23 @@ export default function Home() {
   const [activeNav, setActiveNav] = useState<string | null>(null);
   const capabilitySectionsRef = useRef<HTMLDivElement | null>(null);
   const processSectionRef = useRef<HTMLElement | null>(null);
+  const modalScrollYRef = useRef(0);
+  useEffect(() => {
+    if (!activeVideo) return;
+    const scrollY = window.scrollY;
+    modalScrollYRef.current = scrollY;
+    const previous = {
+      bodyOverflow: document.body.style.overflow,
+      htmlScrollBehavior: document.documentElement.style.scrollBehavior,
+    };
+    document.documentElement.style.scrollBehavior = "auto";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous.bodyOverflow;
+      document.documentElement.style.scrollBehavior = previous.htmlScrollBehavior;
+      window.scrollTo({ top: modalScrollYRef.current, left: 0, behavior: "auto" });
+    };
+  }, [activeVideo]);
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const duration = reducedMotion ? 320 : 1600;
@@ -255,7 +280,7 @@ export default function Home() {
 
         <section id="work" className="work section-pad section-reveal">
           <div className="section-heading"><div><SectionLabel>04 / Selected work</SectionLabel><h2>Built for the<br /><em>afterimage.</em></h2></div><p>Three directions, one shared aim: leave the viewer with a feeling they can name later.</p></div>
-          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} project={project} index={i} onPlay={(src, title) => setActiveVideo({ src, title })} />)}</div>
+          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} project={project} index={i} onPlay={(src, title, isReel) => setActiveVideo({ src, title, isReel })} />)}</div>
         </section>
 
         <section id="services" className="services section-pad section-reveal">
@@ -273,9 +298,9 @@ export default function Home() {
 
         <section id="contact" className="cta-contact section-pad section-reveal"><div className="cta-contact-copy"><SectionLabel>07 / Make something worth keeping</SectionLabel><h2>Let’s create something<br /><em>cinematic.</em></h2></div><div className="contact-directory" aria-label="Contact links"><div className="email-contact-row"><a href="mailto:hello@msarw.com?subject=MSARW%20Project%20Inquiry" aria-label="Email MSARW at hello@msarw.com"><span>Email</span><small>hello@msarw.com</small></a><button className="copy-email" type="button" onClick={handleCopyEmail} aria-label={copiedEmail ? "Email address copied" : "Copy email address"} title={copiedEmail ? "Copied" : "Copy email address"}><Copy size={14} /></button></div><a href="https://www.linkedin.com/in/msarw" target="_blank" rel="noreferrer"><span>LinkedIn</span><small>/in/msarw</small><MSARWArrow /></a><a href="https://www.fiverr.com/" target="_blank" rel="noreferrer"><span>Fiverr</span><small>fiverr.com</small><MSARWArrow /></a><a href="https://www.whatsapp.com/" target="_blank" rel="noreferrer"><span>WhatsApp</span><small>msarw</small><MSARWArrow /></a></div></section>
 
-        {activeVideo && <div className="video-modal" role="dialog" aria-modal="true" aria-label={`${activeVideo.title} full video`} onClick={() => setActiveVideo(null)}><div className="video-modal-inner" onClick={(event) => event.stopPropagation()}><button type="button" className="video-close" onClick={() => setActiveVideo(null)} aria-label="Close video">×</button><p className="section-label"><span className="section-dot" />NOW PLAYING / {activeVideo.title}</p><video src={activeVideo.src} controls autoPlay playsInline className="full-video" /></div></div>}
         <section className="faq section-pad section-reveal"><SectionLabel>09 / Small print</SectionLabel><div className="faq-list">{faqs.map(([q, a], i) => { const isOpen = openFaq === i; return <div className="faq-item" key={q}><button aria-expanded={isOpen} aria-controls={`faq-answer-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)}><span>{q}</span><span className="faq-symbol" aria-hidden="true">{isOpen ? "^" : "˅"}</span></button><div id={`faq-answer-${i}`} className={`faq-answer ${isOpen ? "is-open" : ""}`}><p className="faq-answer-text">{a}</p></div></div>; })}</div></section>
       </main>
+      {activeVideo && <div className="video-modal" role="dialog" aria-modal="true" aria-label={`${activeVideo.title} full video`} onClick={() => setActiveVideo(null)}><div className={`video-modal-inner ${activeVideo.isReel ? "is-reel" : ""}`} onClick={(event) => event.stopPropagation()}><button type="button" className="video-close" onClick={() => setActiveVideo(null)} aria-label="Close video">×</button><p className="section-label"><span className="section-dot" />NOW PLAYING / {activeVideo.title}</p><video src={activeVideo.src} controls controlsList="nodownload noremoteplayback" disablePictureInPicture autoPlay playsInline className={`full-video ${activeVideo.isReel ? "full-video-reel" : ""}`} /></div></div>}
       <footer className="footer"><span className="footer-identity">© 2026 MSARW — ALL FRAMES RESERVED</span><a href="#top" onClick={scrollToTop}>Back to top <MSARWArrow /></a></footer>
     </div>
   );

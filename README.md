@@ -53,4 +53,4 @@ The website is ready to deploy on platforms like **Vercel** with no additional s
 ---
 
 Built with ❤️ for creative professionals.
-lxygm 2026
+lyxgm 2026
