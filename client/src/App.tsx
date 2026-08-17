@@ -1,6 +1,8 @@
-/* Deep-Ocean Instrument Panel: keep the global shell focused on the single narrative portfolio experience. */
+/* Deep-Ocean routing shell: the portfolio owns the root route and all unknown paths resolve to the branded 404. */
 import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
-  return <Home />;
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  return pathname === "/" ? <Home /> : <NotFound />;
 }
