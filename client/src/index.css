@@ -4858,21 +4858,21 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   visibility: hidden;
 }
 .loading-screen.is-visible { opacity: 1; pointer-events: auto; visibility: visible; animation: loading-screen-enter 820ms cubic-bezier(.23,1,.32,1) both; }
-.loading-screen.is-fading { opacity: .82; pointer-events: none; visibility: visible; }
+.loading-screen.is-fading { opacity: .38; pointer-events: none; visibility: visible; }
 .loading-screen.is-hidden { opacity: 0; visibility: hidden; }
 .loading-screen > * {
   opacity: 1;
   transform: translateY(0) scale(1);
-  transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1150ms cubic-bezier(.23,1,.32,1), filter 1150ms ease;
+  transition: opacity 1350ms cubic-bezier(.23,1,.32,1), transform 1350ms cubic-bezier(.23,1,.32,1), filter 1350ms ease;
 }
 .loading-screen.is-fading > * {
   opacity: 0;
-  transform: translateY(-28px) scale(.985);
+  transform: translateY(-24px) scale(.985);
   filter: blur(3px);
 }
 .loading-screen.is-fading .loading-logo {
   transition-delay: 80ms;
-  transform: translateY(-28px) scale(.985);
+  transform: translateY(-24px) scale(.985);
 }
 .loading-screen.is-fading .loading-progress { transition-delay: 180ms; }
 .loading-screen.is-fading .loading-label { transition-delay: 280ms; }
@@ -4923,6 +4923,60 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 @media (max-width: 600px) {
   .loading-logo { width: 142px; height: 34px; }
   .loading-rule { width: 96px; }
+}
+
+/* Coordinated loading-to-landing handoff. The atmosphere and hero layers fade in underneath the loading text. */
+.site-shell > .interactive-backdrop {
+  opacity: 0;
+  transform: scale(1.035);
+  transition: opacity 1350ms cubic-bezier(.23,1,.32,1), transform 1600ms cubic-bezier(.23,1,.32,1);
+}
+.site-shell.is-transitioning > .interactive-backdrop,
+.site-shell.is-ready > .interactive-backdrop {
+  opacity: 1;
+  transform: scale(1);
+}
+.site-shell > main .hero-bg {
+  opacity: 0;
+  transform: scale(1.035);
+  transition: opacity 1250ms cubic-bezier(.23,1,.32,1), transform 1600ms cubic-bezier(.23,1,.32,1);
+}
+.site-shell.is-transitioning > main .hero-bg,
+.site-shell.is-ready > main .hero-bg {
+  opacity: .92;
+  transform: scale(1.035);
+}
+.site-shell > main .hero-grid {
+  opacity: 0;
+  transition: opacity 1100ms cubic-bezier(.23,1,.32,1);
+}
+.site-shell.is-transitioning > main .hero-grid,
+.site-shell.is-ready > main .hero-grid {
+  opacity: .26;
+}
+.site-shell > main .hero-copy,
+.site-shell > main .hero-meta {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1350ms cubic-bezier(.23,1,.32,1);
+}
+.site-shell.is-transitioning > main .hero-copy,
+.site-shell.is-transitioning > main .hero-meta,
+.site-shell.is-ready > main .hero-copy,
+.site-shell.is-ready > main .hero-meta {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-shell > .interactive-backdrop,
+  .site-shell > main .hero-bg,
+  .site-shell > main .hero-grid,
+  .site-shell > main .hero-copy,
+  .site-shell > main .hero-meta {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Neon scrollbar: a slim blue-lit thumb keeps the browser chrome in the same Deep-Ocean visual system. */

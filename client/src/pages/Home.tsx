@@ -126,7 +126,7 @@ export default function Home() {
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const duration = reducedMotion ? 320 : 1600;
-    const fadeDuration = reducedMotion ? 0 : 1250;
+    const fadeDuration = reducedMotion ? 0 : 1350;
     const startedAt = performance.now();
     let frame = 0;
     let fadeTimer = 0;
