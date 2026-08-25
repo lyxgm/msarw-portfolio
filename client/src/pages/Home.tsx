@@ -57,8 +57,8 @@ function MSARWArrow() {
   return <img className="msarw-arrow" src="/assets/msarw-custom-arrow.png" alt="" aria-hidden="true" />;
 }
 
-function ProjectCard({ project, index, onPlay }: { project: [string, string, string, string, string]; index: number; onPlay: (video: string, title: string, isReel: boolean) => void }) {
-  const [title, category, software, image, video] = project;
+function ProjectCard({ project, index, onPlay }: { project: [string, string, string, string]; index: number; onPlay: (video: string, title: string, isReel: boolean) => void }) {
+  const [title, category, image, video] = project;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const timerRef = useRef<number | null>(null);
   const startPreview = () => {
@@ -87,7 +87,7 @@ function ProjectCard({ project, index, onPlay }: { project: [string, string, str
       <div className="preview-label">HOVER PREVIEW / 05 SEC</div>
       <button type="button" className="play-button" aria-label={`Play ${title}`} onClick={openProject}><Play size={18} fill="currentColor" /></button>
     </div>
-    <div className="project-info"><div><h3>{title}</h3><p>{category}</p><div className="project-timeline"><span /><span /><span /><span /><span /></div></div><Pill dark>{software}</Pill></div>
+    <div className="project-info"><div><h3>{title}</h3><p>{category}</p><div className="project-timeline"><span /><span /><span /><span /><span /></div></div></div>
   </article>;
 }
 
@@ -279,7 +279,7 @@ export default function Home() {
 
         <section id="work" className="work section-pad section-reveal">
           <div className="section-heading"><div><SectionLabel>04 / Selected work</SectionLabel><h2>Built for the<br /><em>afterimage.</em></h2></div><a className="mini-pill archive-cta" href="https://drive.google.com/drive/folders/PLACEHOLDER_ARCHIVE_ID" target="_blank" rel="noreferrer">View my archive</a></div>
-          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} index={i} onPlay={(src, title, isReel) => setActiveVideo({ src, title, isReel })} />)}</div>
+          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} project={project} index={i} onPlay={(src, title, isReel) => setActiveVideo({ src, title, isReel })} />)}</div>
         </section>
 
         <section id="services" className="services section-pad section-reveal">
