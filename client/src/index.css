@@ -23,6 +23,7 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "SF Mono", "Roboto Mono", monospace;
+  --content-max-width: 1440px;
 }
 
 * { box-sizing: border-box; }
@@ -49,7 +50,10 @@ button { cursor: pointer; }
 .mini-pill:hover, .primary-pill:hover, .pill:hover { filter: brightness(1.14); border-color: rgba(255,255,255,.25); transform: translateY(-2px); }
 .mini-pill:active, .primary-pill:active { transform: scale(.97); }
 .mini-pill { padding: 10px 15px; font-size: 11px; letter-spacing: .06em; }
-.section-pad { padding-left: clamp(20px, 7vw, 110px); padding-right: clamp(20px, 7vw, 110px); }
+.section-pad {
+  padding-left: max(clamp(20px, 7vw, 110px), calc((100vw - var(--content-max-width)) / 2));
+  padding-right: max(clamp(20px, 7vw, 110px), calc((100vw - var(--content-max-width)) / 2));
+}
 .section-label { display: flex; align-items: center; gap: 10px; margin: 0 0 28px; color: #74c4e6; font: 11px var(--font-mono); letter-spacing: .18em; text-transform: uppercase; }
 .section-mark { width: 15px; height: 15px; object-fit: contain; opacity: .85; filter: drop-shadow(0 0 7px rgba(21,146,200,.55)); }
 .section-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 14px rgba(21,146,200,.8); }
@@ -67,7 +71,7 @@ h1 em, h2 em { color: var(--cyan); font-style: normal; }
 .primary-pill { padding: 15px 21px; font-size: 12px; letter-spacing: .05em; }
 .text-link { color: #aab8bd; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
 .text-link span { color: var(--cyan); font-size: 17px; margin-left: 4px; }
-.hero-meta { position: absolute; bottom: 34px; left: clamp(20px, 7vw, 110px); right: clamp(20px, 7vw, 110px); display: flex; align-items: center; gap: 20px; color: #6d7b82; font: 10px var(--font-mono); letter-spacing: .16em; }
+.hero-meta { position: absolute; bottom: 34px; left: max(clamp(20px, 7vw, 110px), calc((100vw - var(--content-max-width)) / 2)); right: max(clamp(20px, 7vw, 110px), calc((100vw - var(--content-max-width)) / 2)); display: flex; align-items: center; gap: 20px; color: #6d7b82; font: 10px var(--font-mono); letter-spacing: .16em; }
 .meta-line { height: 1px; flex: 1; background: linear-gradient(90deg, var(--cyan), transparent); }
 .split-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); gap: 8vw; padding-top: 150px; padding-bottom: 150px; border-bottom: 1px solid var(--line); }
 .split-section h2, .section-heading h2 { max-width: 670px; font-size: clamp(48px, 7vw, 102px); line-height: .92; letter-spacing: -.065em; }
