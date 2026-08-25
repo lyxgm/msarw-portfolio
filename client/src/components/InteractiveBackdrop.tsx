@@ -3,8 +3,24 @@ import { useEffect, useRef } from "react";
 
 type Particle = { x: number; y: number; size: number; speed: number; phase: number; alpha: number };
 
-export default function InteractiveBackdrop() {
+type InteractiveBackdropProps = {
+  loadingProgress?: number;
+};
+
+type WaveOptions = {
+  offset: number;
+  amplitude: number;
+  color: string;
+  lineWidth: number;
+  speed: number;
+};
+
+const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
+
+export default function InteractiveBackdrop({ loadingProgress = 0 }: InteractiveBackdropProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const loadingProgressRef = useRef(loadingProgress);
+  loadingProgressRef.current = loadingProgress;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -50,16 +66,17 @@ export default function InteractiveBackdrop() {
       scrollProgress = Math.min(1, Math.max(0, window.scrollY / maxScroll));
     };
 
-    const drawWave = (time: number, offset: number, amplitude: number, color: string, lineWidth: number, speed: number) => {
+    const drawWave = (time: number, startX: number, endX: number, options: WaveOptions, morph: number) => {
       context.beginPath();
-      for (let x = -40; x <= width + 40; x += 12) {
+      for (let x = startX; x <= endX; x += 10) {
         const normalized = x / Math.max(1, width);
-        const y = height * (0.28 + offset) + Math.sin(normalized * 8 + time * speed + pointer.x * 2) * amplitude + Math.sin(normalized * 19 - time * speed * 0.7) * amplitude * 0.34 + pointer.y * amplitude * 1.5;
-        if (x === -40) context.moveTo(x, y);
+        const waveY = height * (0.28 + options.offset) + Math.sin(normalized * 8 + time * options.speed + pointer.x * 2) * options.amplitude + Math.sin(normalized * 19 - time * options.speed * 0.7) * options.amplitude * 0.34 + pointer.y * options.amplitude * 1.5;
+        const y = height / 2 + (waveY - height / 2) * morph;
+        if (x === startX) context.moveTo(x, y);
         else context.lineTo(x, y);
       }
-      context.strokeStyle = color;
-      context.lineWidth = lineWidth;
+      context.strokeStyle = options.color;
+      context.lineWidth = options.lineWidth;
       context.stroke();
     };
 
@@ -67,6 +84,10 @@ export default function InteractiveBackdrop() {
       pointer.x += (pointerTarget.x - pointer.x) * 0.06;
       pointer.y += (pointerTarget.y - pointer.y) * 0.06;
       const hue = scrollProgress * 28;
+      const handoff = easeOut(Math.min(1, Math.max(0, loadingProgressRef.current / 100)));
+      const lineHalfWidth = 59 * (0.15 + handoff * 8.5);
+      const loadingStartX = width / 2 - lineHalfWidth;
+      const loadingEndX = width / 2 + lineHalfWidth;
       const background = context.createLinearGradient(0, 0, width, height);
       background.addColorStop(0, `hsl(${194 + hue}, 46%, 3%)`);
       background.addColorStop(0.52, `hsl(${202 + hue}, 58%, 6%)`);
@@ -83,9 +104,18 @@ export default function InteractiveBackdrop() {
 
       context.save();
       context.translate(pointer.x * 28, pointer.y * 20);
-      drawWave(time, 0.04, height * 0.035, `hsla(${190 + hue}, 92%, 62%, .42)`, 1.1, 0.00045);
-      drawWave(time, 0.17, height * 0.052, `hsla(${202 + hue}, 86%, 50%, .23)`, 1.5, -0.00034);
-      drawWave(time, 0.31, height * 0.075, `hsla(${218 + hue}, 86%, 58%, .16)`, 1.2, 0.00025);
+      const waves: WaveOptions[] = [
+        { offset: 0.04, amplitude: height * 0.035, color: `hsla(${190 + hue}, 92%, 62%, .42)`, lineWidth: 1.1, speed: 0.00045 },
+        { offset: 0.17, amplitude: height * 0.052, color: `hsla(${202 + hue}, 86%, 50%, .23)`, lineWidth: 1.5, speed: -0.00034 },
+        { offset: 0.31, amplitude: height * 0.075, color: `hsla(${218 + hue}, 86%, 58%, .16)`, lineWidth: 1.2, speed: 0.00025 },
+      ];
+
+      drawWave(time, handoff >= 1 ? -40 : loadingStartX, handoff >= 1 ? width + 40 : loadingEndX, waves[0], handoff);
+      if (handoff > 0.65) {
+        const secondaryMorph = (handoff - 0.65) / 0.35;
+        drawWave(time, -40, width + 40, waves[1], secondaryMorph);
+        drawWave(time, -40, width + 40, waves[2], secondaryMorph * 0.8);
+      }
       context.restore();
 
       for (const particle of particles) {
