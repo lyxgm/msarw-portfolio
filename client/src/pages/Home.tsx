@@ -13,12 +13,11 @@ const services = [
   ["01", "YouTube Videos & Vlogs", "Long-form edits focused on storytelling, pacing, and keeping viewers engaged from start to finish."],
   ["02", "Talking Head Videos", "Retention-driven edits with dynamic cuts, zooms, captions, and pattern interrupts for creator content."],
   ["03", "Video Podcasts", "Clean multi-camera edits with polished audio, branding, and a smooth viewing experience."],
-  ["04", "Reels, Shorts & TikToks", "Fast-paced vertical edits built around strong hooks, captions, and platform-native pacing."],
+  ["04", "Reels & Shorts", "Fast-paced vertical edits built around strong hooks, captions, and platform-native pacing."],
   ["05", "Corporate & Business Videos", "Professional edits that communicate your message with clarity, credibility, and polished visuals."],
   ["06", "Real Estate Walkthroughs", "Cinematic property showcases with seamless transitions, color grading, and engaging walkthroughs."],
-  ["07", "Faceless & Automated Videos", "Engaging edits that combine AI visuals, stock footage, motion graphics, and voiceovers into compelling content."],
-  ["08", "Documentary & Short Films", "Story-driven editing with cinematic pacing, immersive sound design, and impactful visual storytelling."],
-  ["09", "Custom Projects", "Tailored edits that match your vision, goals, and unique project requirements."],
+  ["07", "Documentary", "Story-driven editing with cinematic pacing, immersive sound design, and impactful visual storytelling."],
+  ["08", "Custom Projects", "Tailored edits that match your vision, goals, and unique project requirements."],
 ];
 const previewVideo = "/assets/project-preview-flower.mp4";
 const projects: [string, string, string, string, string][] = [
@@ -28,20 +27,20 @@ const projects: [string, string, string, string, string][] = [
 ];
 const process = [
   ["01", "Client Brief", "Understanding the story you need told.", "A short call or brief to pin down audience, tone, deadline, and deliverables before a single clip is touched."],
-  ["02", "Planning", "Structuring the edit before the timeline opens.", "Footage is logged, selects are marked, and a rough structure is mapped so the first cut has direction, not guesswork."],
+  ["02", "Planning", "Structuring the edit before the timeline opens.", "Footage is reviewed and organized, key moments are selected, and the overall structure is mapped out so the first cut has clear direction."],
   ["03", "Editing", "Building rhythm, pace, and narrative flow.", "The assembly becomes a story — cuts land on beats, pacing tightens, and the piece finds its shape."],
-  ["04", "Color Grading", "Giving every frame a consistent mood.", "Exposure, contrast, and tone are matched shot to shot in DaVinci Resolve for a unified, cinematic look."],
-  ["05", "Sound Design", "Mixing dialogue, music, and texture.", "Levels are balanced, music is scored to picture, and small foley details are layered in so the piece feels alive."],
-  ["06", "Motion Graphics", "Adding titles, transitions, and polish.", "Type, logos, and graphic transitions are animated in After Effects to match the pacing already set."],
+  ["04", "Motion Graphics", "Adding titles, transitions, and polish.", "Type, logos, and graphic transitions are animated to match the pacing already set."],  
+  ["05", "Color Grading", "Giving every frame a consistent mood.", "Exposure, contrast, and tone are matched shot to shot for a unified, cinematic look."],
+  ["06", "Sound Design", "Mixing dialogue, music, and texture.", "Levels are balanced, music is scored to picture, and small foley details are layered in so the piece feels alive."],
   ["07", "Delivery", "Exporting, reviewing, and handing it off.", "Final files are rendered to spec for every platform, with two rounds of revisions built in before delivery."],
 ];
 type ClickBubble = { id: number; x: number; y: number };
 
 const faqs = [
-  ["What's the typical turnaround time?", "Short-form edits typically take 2–4 business days. Full commercials, wedding films, or documentary work generally run 1–3 weeks depending on footage volume and revision rounds."],
-  ["How do I send you my footage?", "Google Drive, Dropbox, or Frame.io links all work fine. For larger raw camera files, a shared drive or physical drive transfer can be arranged for local clients."],
+  ["What's the typical turnaround time?", "Short-form edits typically take 1–3 business days, while long-form videos may take longer depending on the volume of footage and number of revision rounds. Simpler edits generally take around 3–4 business days."],
+  ["How do I send you my footage?", "You can share your footage through Google Drive or Dropbox. Both are fully supported and easy to use."],
   ["How many revisions are included?", "Every project includes two rounds of revisions. Additional rounds are billed hourly and always confirmed with you before any extra work begins."],
-  ["How is pricing structured?", "Most projects are quoted flat-rate based on scope, length, and complexity after a short discovery call. Ongoing channel work is available on a monthly retainer."],
+  ["How is pricing structured?", "Projects are typically quoted at a flat rate based on the scope, video length, and complexity of the edit."],
   ["Can you take on rush projects?", "Yes, depending on current availability. Rush delivery carries a priority fee and is confirmed upfront before any work begins."],
   ["Who owns the raw and final files?", "You do. All raw footage and final delivered files remain fully yours, with project files archived on my end for 90 days after delivery."],
 ];
@@ -259,7 +258,7 @@ export default function Home() {
             <div className="hero-actions"><a className="primary-pill" href="#work">View Portfolio</a><a className="text-link" href="#contact" onClick={scrollToContact}>Let’s Work Together</a></div>
           </div>
           <a className="scroll-cue" href="#intro" aria-label="Scroll to the introduction"><span>SCROLL TO EXPLORE</span><img className="scroll-cue-arrow" src="/assets/msarw-custom-arrow.png" alt="" aria-hidden="true" /></a>
-          <div className="hero-meta"><span>AVAILABLE FOR SELECT PROJECTS</span><span>2026</span><span className="meta-line" /></div>
+          <div className="hero-meta"><span>AVAILABLE FOR PROJECTS</span><span>2026</span><span className="meta-line" /></div>
         </section>
 
         <section id="intro" className="intro section-pad split-section section-reveal">
@@ -296,12 +295,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="cta-contact section-pad section-reveal"><div className="cta-contact-copy"><SectionLabel>07 / Make something worth keeping</SectionLabel><h2>Let’s create something<br /><em>cinematic.</em></h2></div><div className="contact-directory" aria-label="Contact links"><div className="email-contact-row"><a href="mailto:hello@msarw.com?subject=MSARW%20Project%20Inquiry" aria-label="Email MSARW at hello@msarw.com"><span>Email</span><small>hello@msarw.com</small></a><button className="copy-email" type="button" onClick={handleCopyEmail} aria-label={copiedEmail ? "Email address copied" : "Copy email address"} title={copiedEmail ? "Copied" : "Copy email address"}><Copy size={14} /></button></div><a href="https://www.linkedin.com/in/msarw" target="_blank" rel="noreferrer"><span>LinkedIn</span><small>/in/msarw</small><MSARWArrow /></a><a href="https://www.fiverr.com/" target="_blank" rel="noreferrer"><span>Fiverr</span><small>fiverr.com</small><MSARWArrow /></a><a href="https://www.whatsapp.com/" target="_blank" rel="noreferrer"><span>WhatsApp</span><small>msarw</small><MSARWArrow /></a></div></section>
+        <section id="contact" className="cta-contact section-pad section-reveal"><div className="cta-contact-copy"><SectionLabel>07 / Make something worth keeping</SectionLabel><h2>Let’s create something<br /><em>cinematic.</em></h2></div><div className="contact-directory" aria-label="Contact links"><div className="email-contact-row"><a href="mailto:hello@msarw.com?subject=MSARW%20Project%20Inquiry" aria-label="Email MSARW at hello@msarw.com"><span>Email</span><small>hello@msarw.com</small></a><button className="copy-email" type="button" onClick={handleCopyEmail} aria-label={copiedEmail ? "Email address copied" : "Copy email address"} title={copiedEmail ? "Copied" : "Copy email address"}><Copy size={14} /></button></div><a href="https://www.linkedin.com/in/msarw" target="_blank" rel="noreferrer"><span>LinkedIn</span><small>/in/msarw</small><MSARWArrow /></a><a href="https://www.fiverr.com/" target="_blank" rel="noreferrer"><span>Fiverr</span><small>fiverr.com</small><MSARWArrow /></a><a href="https://www.upwork.com/" target="_blank" rel="noreferrer"><span>Upwork</span><small>msarw</small><MSARWArrow /></a></div></section>
 
         <section className="faq section-pad section-reveal"><SectionLabel>09 / Small print</SectionLabel><div className="faq-list">{faqs.map(([q, a], i) => { const isOpen = openFaq === i; return <div className="faq-item" key={q}><button aria-expanded={isOpen} aria-controls={`faq-answer-${i}`} onClick={() => setOpenFaq(isOpen ? null : i)}><span>{q}</span><span className="faq-symbol" aria-hidden="true">{isOpen ? "^" : "˅"}</span></button><div id={`faq-answer-${i}`} className={`faq-answer ${isOpen ? "is-open" : ""}`}><p className="faq-answer-text">{a}</p></div></div>; })}</div></section>
       </main>
       {activeVideo && <div className="video-modal" role="dialog" aria-modal="true" aria-label={`${activeVideo.title} full video`} onClick={() => setActiveVideo(null)}><div className={`video-modal-inner ${activeVideo.isReel ? "is-reel" : ""}`} onClick={(event) => event.stopPropagation()}><button type="button" className="video-close" onClick={() => setActiveVideo(null)} aria-label="Close video">×</button><p className="section-label"><span className="section-dot" />NOW PLAYING / {activeVideo.title}</p><video src={activeVideo.src} controls controlsList="nodownload noremoteplayback" disablePictureInPicture autoPlay playsInline className={`full-video ${activeVideo.isReel ? "full-video-reel" : ""}`} /></div></div>}
-      <footer className="footer"><span className="footer-identity">© 2026 MSARW — ALL FRAMES RESERVED</span><a href="#top" onClick={scrollToTop}>Back to top <MSARWArrow /></a></footer>
+      <footer className="footer"><span className="footer-identity">MSARW — ALL FRAMES RESERVED</span><a href="#top" onClick={scrollToTop}>Back to top <MSARWArrow /></a></footer>
     </div>
   );
 }
