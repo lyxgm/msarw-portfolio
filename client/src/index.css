@@ -4880,7 +4880,7 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 .site-shell > main {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1150ms cubic-bezier(.23,1,.32,1);
+  transition: opacity 1050ms cubic-bezier(.23,1,.32,1), transform 1050ms cubic-bezier(.23,1,.32,1);
 }
 .site-shell.is-ready > .topbar,
 .site-shell.is-ready > main {
@@ -4931,30 +4931,35 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 .site-shell > main .hero-bg {
   opacity: 0;
   transform: scale(1.035);
-  transition: opacity 1250ms cubic-bezier(.23,1,.32,1), transform 1600ms cubic-bezier(.23,1,.32,1);
+  transition: opacity 1000ms cubic-bezier(.23,1,.32,1), transform 1250ms cubic-bezier(.23,1,.32,1);
 }
 .site-shell.is-ready > main .hero-bg {
   opacity: .92;
   transform: scale(1.035);
+  transition-delay: 0ms;
 }
 .site-shell > main .hero-grid {
   opacity: 0;
-  transition: opacity 1100ms cubic-bezier(.23,1,.32,1);
+  transition: opacity 850ms cubic-bezier(.23,1,.32,1);
 }
 .site-shell.is-ready > main .hero-grid {
   opacity: .26;
+  transition-delay: 90ms;
 }
 .site-shell > main .hero-copy,
 .site-shell > main .hero-meta {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1350ms cubic-bezier(.23,1,.32,1);
+  transition: opacity 1050ms cubic-bezier(.23,1,.32,1), transform 1200ms cubic-bezier(.23,1,.32,1);
 }
 .site-shell.is-ready > main .hero-copy,
 .site-shell.is-ready > main .hero-meta {
   opacity: 1;
   transform: translateY(0);
 }
+.site-shell.is-ready > main .hero-copy { transition-delay: 120ms; }
+.site-shell.is-ready > main .hero-meta { transition-delay: 190ms; }
+.site-shell.is-ready > .topbar { transition-delay: 60ms; }
 @media (prefers-reduced-motion: reduce) {
   .site-shell > .interactive-backdrop,
   .site-shell > main .hero-bg,
