@@ -4860,6 +4860,19 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 .loading-screen.is-visible { opacity: 1; pointer-events: auto; visibility: visible; animation: loading-screen-enter 820ms cubic-bezier(.23,1,.32,1) both; }
 .loading-screen.is-fading { opacity: 0; pointer-events: none; visibility: visible; }
 .loading-screen.is-hidden { opacity: 0; visibility: hidden; }
+.loading-screen > * {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 520ms cubic-bezier(.23,1,.32,1), transform 700ms cubic-bezier(.23,1,.32,1), filter 700ms ease;
+}
+.loading-screen.is-fading > * {
+  opacity: 0;
+  transform: translateY(-14px) scale(.975);
+  filter: blur(5px);
+}
+.loading-screen.is-fading .loading-logo { transition-delay: 0ms; }
+.loading-screen.is-fading .loading-progress { transition-delay: 55ms; }
+.loading-screen.is-fading .loading-label { transition-delay: 110ms; }
 .site-shell > .topbar, .site-shell > main { opacity: 0; transform: translateY(10px); transition: opacity 980ms cubic-bezier(.23,1,.32,1), transform 980ms cubic-bezier(.23,1,.32,1); }
 .site-shell.is-ready > .topbar, .site-shell.is-ready > main { opacity: 1; transform: translateY(0); }
 @keyframes loading-screen-enter { from { opacity: 0; } to { opacity: 1; } }
@@ -4880,6 +4893,7 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 .topbar nav a.is-active { color: #dffaff; text-shadow: 0 0 6px rgba(0,207,255,.72), 0 0 14px rgba(0,119,255,.38); }
 @media (prefers-reduced-motion: reduce) {
   .loading-screen { transition: none; animation: none !important; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .loading-screen > * { transition: none; filter: none; }
   .site-shell > .topbar, .site-shell > main { transition: none; transform: none; }
   .loading-logo, .loading-rule { animation: none; }
   .loading-logo, .loading-progress { opacity: 1; }
