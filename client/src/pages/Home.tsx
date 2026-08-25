@@ -279,7 +279,7 @@ export default function Home() {
 
         <section id="work" className="work section-pad section-reveal">
           <div className="section-heading"><div><SectionLabel>04 / Selected work</SectionLabel><h2>Built for the<br /><em>afterimage.</em></h2></div><a className="mini-pill archive-cta" href="https://drive.google.com/drive/folders/PLACEHOLDER_ARCHIVE_ID" target="_blank" rel="noreferrer">View my archive</a></div>
-          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} project={project} index={i} onPlay={(src, title, isReel) => setActiveVideo({ src, title, isReel })} />)}</div>
+          <div className="project-stack">{projects.map((project, i) => <ProjectCard key={project[0]} index={i} onPlay={(src, title, isReel) => setActiveVideo({ src, title, isReel })} />)}</div>
         </section>
 
         <section id="services" className="services section-pad section-reveal">
