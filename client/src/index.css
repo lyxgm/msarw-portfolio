@@ -4858,21 +4858,21 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   visibility: hidden;
 }
 .loading-screen.is-visible { opacity: 1; pointer-events: auto; visibility: visible; animation: loading-screen-enter 820ms cubic-bezier(.23,1,.32,1) both; }
-.loading-screen.is-fading { opacity: 0; pointer-events: none; visibility: visible; }
+.loading-screen.is-fading { opacity: .82; pointer-events: none; visibility: visible; }
 .loading-screen.is-hidden { opacity: 0; visibility: hidden; }
 .loading-screen > * {
   opacity: 1;
   transform: translateY(0) scale(1);
-  transition: opacity 520ms cubic-bezier(.23,1,.32,1), transform 700ms cubic-bezier(.23,1,.32,1), filter 700ms ease;
+  transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1150ms cubic-bezier(.23,1,.32,1), filter 1150ms ease;
 }
 .loading-screen.is-fading > * {
   opacity: 0;
-  transform: translateY(-14px) scale(.975);
-  filter: blur(5px);
+  transform: translateY(-8px) scale(.985);
+  filter: blur(3px);
 }
-.loading-screen.is-fading .loading-logo { transition-delay: 0ms; }
-.loading-screen.is-fading .loading-progress { transition-delay: 55ms; }
-.loading-screen.is-fading .loading-label { transition-delay: 110ms; }
+.loading-screen.is-fading .loading-logo { transition-delay: 80ms; }
+.loading-screen.is-fading .loading-progress { transition-delay: 180ms; }
+.loading-screen.is-fading .loading-label { transition-delay: 280ms; }
 .site-shell > .topbar, .site-shell > main {
   opacity: 0;
   transform: translateY(18px);
@@ -4908,6 +4908,7 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 @media (prefers-reduced-motion: reduce) {
   .loading-screen { transition: none; animation: none !important; backdrop-filter: none; -webkit-backdrop-filter: none; }
   .loading-screen > * { transition: none; filter: none; }
+  .loading-screen.is-fading { opacity: 0; }
   .site-shell > .topbar, .site-shell > main { transition: none; transform: none; }
   .site-shell.is-transitioning > .topbar, .site-shell.is-transitioning > main { transition-delay: 0ms; }
   .loading-logo, .loading-rule { animation: none; }
