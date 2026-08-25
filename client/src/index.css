@@ -4882,15 +4882,13 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   transform: translateY(28px);
   transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1150ms cubic-bezier(.23,1,.32,1);
 }
-.site-shell.is-transitioning > .topbar,
-.site-shell.is-transitioning > main,
 .site-shell.is-ready > .topbar,
 .site-shell.is-ready > main {
   opacity: 1;
   transform: translateY(0);
 }
-.site-shell.is-transitioning > .topbar,
-.site-shell.is-transitioning > main {
+.site-shell.is-ready > .topbar,
+.site-shell.is-ready > main {
   transition-delay: 0ms;
 }
 @keyframes loading-screen-enter { from { opacity: 0; } to { opacity: 1; } }
@@ -4935,7 +4933,6 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   transform: scale(1.035);
   transition: opacity 1250ms cubic-bezier(.23,1,.32,1), transform 1600ms cubic-bezier(.23,1,.32,1);
 }
-.site-shell.is-transitioning > main .hero-bg,
 .site-shell.is-ready > main .hero-bg {
   opacity: .92;
   transform: scale(1.035);
@@ -4944,7 +4941,6 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   opacity: 0;
   transition: opacity 1100ms cubic-bezier(.23,1,.32,1);
 }
-.site-shell.is-transitioning > main .hero-grid,
 .site-shell.is-ready > main .hero-grid {
   opacity: .26;
 }
@@ -4954,8 +4950,6 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
   transform: translateY(24px);
   transition: opacity 1150ms cubic-bezier(.23,1,.32,1), transform 1350ms cubic-bezier(.23,1,.32,1);
 }
-.site-shell.is-transitioning > main .hero-copy,
-.site-shell.is-transitioning > main .hero-meta,
 .site-shell.is-ready > main .hero-copy,
 .site-shell.is-ready > main .hero-meta {
   opacity: 1;
