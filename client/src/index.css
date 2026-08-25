@@ -4927,14 +4927,8 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 
 /* Coordinated loading-to-landing handoff. The atmosphere and hero layers fade in underneath the loading text. */
 .site-shell > .interactive-backdrop {
-  opacity: 0;
-  transform: scale(1.035);
-  transition: opacity 1350ms cubic-bezier(.23,1,.32,1), transform 1600ms cubic-bezier(.23,1,.32,1);
-}
-.site-shell.is-transitioning > .interactive-backdrop,
-.site-shell.is-ready > .interactive-backdrop {
   opacity: 1;
-  transform: scale(1);
+  transform: none;
 }
 .site-shell > main .hero-bg {
   opacity: 0;
