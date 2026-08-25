@@ -234,11 +234,13 @@ export default function Home() {
   };
   return (
     <div className={`site-shell ${loadingState === "done" ? "is-ready" : loadingState === "fading" ? "is-transitioning" : "is-loading"}`} onClick={handleSiteClick}>
-      <div className={`loading-screen ${loadingState === "loading" ? "is-visible" : loadingState === "fading" ? "is-fading" : "is-hidden"}`} style={{ "--loading-blur": `${Math.max(0, 12 - loadingProgress * 0.12)}px` } as CSSProperties} aria-hidden={loadingState === "done"}>
-        <img className="loading-logo" src="/assets/msarw-lettermark-isolated.png" alt="MSARW" />
-        <p className="loading-progress" aria-live="polite">{loadingProgress}%</p>
-        <p className="loading-label">LOADING</p>
-      </div>
+      {loadingState !== "done" && (
+        <div className={`loading-screen ${loadingState === "loading" ? "is-visible" : "is-fading"}`} style={{ "--loading-blur": `${Math.max(0, 12 - loadingProgress * 0.12)}px` } as CSSProperties} aria-hidden="true">
+          <img className="loading-logo" src="/assets/msarw-lettermark-isolated.png" alt="MSARW" />
+          <p className="loading-progress" aria-live="polite">{loadingProgress}%</p>
+          <p className="loading-label">LOADING</p>
+        </div>
+      )}
       <div className="click-bubble-layer" aria-hidden="true">{clickBubbles.map((bubble) => <span key={bubble.id} className="click-bubble" style={{ left: bubble.x, top: bubble.y }} />)}</div>
       <InteractiveBackdrop loadingProgress={loadingProgress} />
       <header className="topbar">
