@@ -4863,16 +4863,16 @@ a, button, [role="button"], [tabindex]:not([tabindex="-1"]), select, summary { c
 .loading-screen > * {
   opacity: 1;
   transform: translateY(0) scale(1);
-  transition: opacity 1350ms cubic-bezier(.23,1,.32,1), transform 1350ms cubic-bezier(.23,1,.32,1), filter 1350ms ease;
+  transition: opacity 1350ms cubic-bezier(.23,1,.32,1);
 }
 .loading-screen.is-fading > * {
   opacity: 0;
-  transform: translateY(-24px) scale(.985);
-  filter: blur(3px);
+  transform: none;
+  filter: none;
 }
 .loading-screen.is-fading .loading-logo {
   transition-delay: 80ms;
-  transform: translateY(-24px) scale(.985);
+  transform: none;
 }
 .loading-screen.is-fading .loading-progress { transition-delay: 180ms; }
 .loading-screen.is-fading .loading-label { transition-delay: 280ms; }
