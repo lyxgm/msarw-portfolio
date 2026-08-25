@@ -20,10 +20,10 @@ const services = [
   ["08", "Custom Projects", "Tailored edits that match your vision, goals, and unique project requirements."],
 ];
 const previewVideo = "/assets/project-preview-flower.mp4";
-const projects: [string, string, string, string, string][] = [
-  ["AURORA", "Brand Film", "DaVinci Resolve", "/assets/project-aurora.jpg", previewVideo],
-  ["NIGHT MARKET", "Documentary Short", "Premiere Pro", "/assets/project-night-market.jpg", previewVideo],
-  ["SIGNAL", "Music Video", "DaVinci Resolve", "/assets/project-signal.jpg", "/assets/project-reel-signal.mp4"],
+const projects: [string, string, string, string][] = [
+  ["AURORA", "Brand Film", "/assets/project-aurora.jpg", previewVideo],
+  ["NIGHT MARKET", "Documentary Short", "/assets/project-night-market.jpg", previewVideo],
+  ["SIGNAL", "Music Video", "/assets/project-signal.jpg", "/assets/project-reel-signal.mp4"],
 ];
 const process = [
   ["01", "Client Brief", "Understanding the story you need told.", "A short call or brief to pin down audience, tone, deadline, and deliverables before a single clip is touched."],
@@ -253,7 +253,7 @@ export default function Home() {
           <div className="hero-bg" />
           <div className="hero-grid" />
           <div className="hero-copy">
-            <SectionLabel noDot>BRAND CONTENT · YOUTUBE · REELS · FILMS · PODCASTS</SectionLabel>
+            <SectionLabel noDot>BRAND CONTENT · YOUTUBE · IG REELS · FILMS · PODCASTS</SectionLabel>
             <h1><span>I Don’t Just<span className="hero-mobile-break"><br /></span> Edit Videos.</span><em>I Craft Stories.</em></h1>
             <div className="hero-actions"><a className="primary-pill" href="#work">View Portfolio</a><a className="text-link" href="#contact" onClick={scrollToContact}>Let’s Work Together</a></div>
           </div>
