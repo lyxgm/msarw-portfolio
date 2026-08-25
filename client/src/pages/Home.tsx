@@ -233,7 +233,7 @@ export default function Home() {
     window.setTimeout(() => setClickBubbles((current) => current.filter((item) => item.id !== id)), 520);
   };
   return (
-    <div className={`site-shell ${loadingState === "done" ? "is-ready" : "is-loading"}`} onClick={handleSiteClick}>
+    <div className={`site-shell ${loadingState === "done" ? "is-ready" : loadingState === "fading" ? "is-transitioning" : "is-loading"}`} onClick={handleSiteClick}>
       <div className={`loading-screen ${loadingState === "loading" ? "is-visible" : loadingState === "fading" ? "is-fading" : "is-hidden"}`} style={{ "--loading-blur": `${Math.max(0, 12 - loadingProgress * 0.12)}px` } as CSSProperties} aria-hidden={loadingState === "done"}>
         <img className="loading-logo" src="/assets/msarw-lettermark-isolated.png" alt="MSARW" />
         <p className="loading-progress" aria-live="polite">{loadingProgress}%</p>
